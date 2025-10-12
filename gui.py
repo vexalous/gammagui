@@ -61,15 +61,18 @@ def clamp(v, lo, hi):
     return max(lo, min(hi, fv))
 
 def apply_gamma(g_val):
+    """Apply gamma to the selected output; g_val is a numeric gamma factor."""
     v = clamp(g_val, 0.5, 10.0)
     gamma_str = f"{v}:{v}:{v}"
     subprocess.call(["xrandr", "--output", OUTPUT, "--gamma", gamma_str])
 
 def apply_brightness(b_val):
+    """Apply brightness to the selected output; b_val is a numeric factor."""
     v = clamp(b_val, 0.1, 2.0)
     subprocess.call(["xrandr", "--output", OUTPUT, "--brightness", str(v)])
 
 def revert(reset_sliders=True):
+    """Restore default gamma and brightness; optionally reset GUI sliders."""
     subprocess.call(
         ["xrandr", "--output", OUTPUT, "--gamma", "1:1:1"],
     )
@@ -84,6 +87,7 @@ def revert(reset_sliders=True):
             pass
 
 def revert_and_exit():
+    """Revert display settings and then destroy the main Tk root window."""
     revert(reset_sliders=True)
     root.destroy()
 
@@ -106,9 +110,11 @@ b.set(100)
 b.pack(pady=(0,8))
 
 def on_gamma_change(val):
+    """Slider callback: convert the slider value and apply gamma."""
     apply_gamma(float(val) / 100.0)
 
 def on_brightness_change(val):
+    """Slider callback: convert the slider value and apply brightness."""
     apply_brightness(float(val) / 100.0)
 
 g.config(command=on_gamma_change)
