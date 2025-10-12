@@ -42,12 +42,11 @@ OUTPUT = PRIMARY or lines[0].split()[0]
 def clamp(v, lo, hi):
     """Convert v to float and clamp it between lo and hi.
 
-    Returns lo if v is not a number. lo and hi are returned unchanged if they
-    cannot be compared to the converted value.
+    Returns lo if v is not a number.
     """
     try:
         fv = float(v)
-    except Exception:
+    except (ValueError, TypeError):
         return lo
     return max(lo, min(hi, fv))
 
