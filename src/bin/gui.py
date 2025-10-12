@@ -86,9 +86,8 @@ def revert(reset_sliders=True):
             pass
 
 
-def revert_and_exit():
-    """Revert display settings and then destroy the main Tk root window."""
-    revert(reset_sliders=True)
+def exit():
+    """Destroy the main Tk root window."""
     root.destroy()
 
 root = Tk()
@@ -134,7 +133,7 @@ btn = Button(
 btn.pack(side=LEFT, padx=5)
 
 btn.pack(side=LEFT, padx=5)
-Button(btnframe, text="Revert & Exit", command=revert_and_exit).pack(side=RIGHT, padx=5)
+Button(btnframe, text="Exit", command=exit).pack(side=RIGHT, padx=5)
 Button(btnframe, text="Revert", command=lambda: revert(reset_sliders=True)).pack(side=RIGHT, padx=5)
 
 root.mainloop()
