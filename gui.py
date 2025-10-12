@@ -133,27 +133,6 @@ btn = Button(
 )
 btn.pack(side=LEFT, padx=5)
 
-btn = Button(
-    btnframe,
-    text="Preset 1.5 / +10%",
-    command=lambda: (
-        g.set(150),
-        b.set(110),
-        apply_gamma(1.50),
-        apply_brightness(1.10),
-    ),
-)
-btn.pack(side=LEFT, padx=5)
-btn = Button(
-    btnframe,
-    text="Preset 2.0 / +20%",
-    command=lambda: (
-        g.set(200),
-        b.set(120),
-        apply_gamma(2.00),
-        apply_brightness(1.20),
-    ),
-)
 btn.pack(side=LEFT, padx=5)
 Button(btnframe, text="Revert & Exit", command=revert_and_exit).pack(side=RIGHT, padx=5)
 Button(btnframe, text="Revert", command=lambda: revert(reset_sliders=True)).pack(side=RIGHT, padx=5)
