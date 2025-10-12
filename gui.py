@@ -82,8 +82,8 @@ def on_gamma_change(val):
 def on_brightness_change(val):
     apply_brightness(float(val) / 100.0)
 
-g.config(command=lambda v: on_gamma_change(v))
-b.config(command=lambda v: on_brightness_change(v))
+g.config(command=on_gamma_change)
+b.config(command=on_brightness_change)
 
 btnframe = Frame(root)
 btnframe.pack(fill="x", padx=10, pady=10)
