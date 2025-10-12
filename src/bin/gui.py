@@ -60,31 +60,31 @@ def clamp(v, lo, hi):
         return lo
     return max(lo, min(hi, fv))
 
+
 def apply_gamma(g_val):
     """Apply gamma to the selected output; g_val is a numeric gamma factor."""
     v = clamp(g_val, 0.5, 10.0)
     gamma_str = f"{v}:{v}:{v}"
-    subprocess.call(["xrandr", "--output", OUTPUT, "--gamma", gamma_str])
+    subprocess.call(["xrandr", "--output", output, "--gamma", gamma_str])
+
 
 def apply_brightness(b_val):
     """Apply brightness to the selected output; b_val is a numeric factor."""
     v = clamp(b_val, 0.1, 2.0)
-    subprocess.call(["xrandr", "--output", OUTPUT, "--brightness", str(v)])
+    subprocess.call(["xrandr", "--output", output, "--brightness", str(v)])
+
 
 def revert(reset_sliders=True):
     """Restore default gamma and brightness; optionally reset GUI sliders."""
-    subprocess.call(
-        ["xrandr", "--output", OUTPUT, "--gamma", "1:1:1"],
-    )
-    subprocess.call(
-        ["xrandr", "--output", OUTPUT, "--brightness", "1"],
-    )
+    subprocess.call(["xrandr", "--output", output, "--gamma", "1:1:1"])
+    subprocess.call(["xrandr", "--output", output, "--brightness", "1"])
     if reset_sliders:
         try:
             g.set(100)
             b.set(100)
         except (NameError, AttributeError, TclError):
             pass
+
 
 def revert_and_exit():
     """Revert display settings and then destroy the main Tk root window."""
