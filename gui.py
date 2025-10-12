@@ -17,15 +17,15 @@ try:
         text=True,
         stderr=subprocess.DEVNULL,
     )
-    
+
 except subprocess.CalledProcessError as e:
     print("ERROR: xrandr returned non-zero exit status:", e, file=sys.stderr)
     sys.exit(1)
-    
+
 except FileNotFoundError as e:
     print("ERROR: xrandr not found:", e, file=sys.stderr)
     sys.exit(1)
-    
+
 lines = [l for l in out.splitlines() if " connected" in l]
 if not lines:
     print("ERROR: no connected output found via xrandr", file=sys.stderr)
