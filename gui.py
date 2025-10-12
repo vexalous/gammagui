@@ -88,10 +88,38 @@ b.config(command=lambda v: on_brightness_change(v))
 btnframe = Frame(root)
 btnframe.pack(fill="x", padx=10, pady=10)
 
-Button(btnframe, text="Apply", command=lambda: (apply_gamma(g.get() / 100.0), apply_brightness(b.get() / 100.0))).pack(side=LEFT, padx=5)
-Button(btnframe, text="Preset 1.5 / +10%", command=lambda: (g.set(150), b.set(110), apply_gamma(1.50), apply_brightness(1.10))).pack(side=LEFT, padx=5)
-Button(btnframe, text="Preset 2.0 / +20%", command=lambda: (g.set(200), b.set(120), apply_gamma(2.00), apply_brightness(1.20))).pack(side=LEFT, padx=5)
+btn = Button(
+    btnframe,
+    text="Apply",
+    command=lambda: (
+        apply_gamma(g.get() / 100.0),
+        apply_brightness(b.get() / 100.0),
+    ),
+)
+btn.pack(side=LEFT, padx=5)
 
+btn = Button(
+    btnframe,
+    text="Preset 1.5 / +10%",
+    command=lambda: (
+        g.set(150),
+        b.set(110),
+        apply_gamma(1.50),
+        apply_brightness(1.10),
+    ),
+)
+btn.pack(side=LEFT, padx=5)
+btn = Button(
+    btnframe,
+    text="Preset 2.0 / +20%",
+    command=lambda: (
+        g.set(200),
+        b.set(120),
+        apply_gamma(2.00),
+        apply_brightness(1.20),
+    ),
+)
+btn.pack(side=LEFT, padx=5)
 Button(btnframe, text="Revert & Exit", command=revert_and_exit).pack(side=RIGHT, padx=5)
 Button(btnframe, text="Revert", command=lambda: revert(reset_sliders=True)).pack(side=RIGHT, padx=5)
 
