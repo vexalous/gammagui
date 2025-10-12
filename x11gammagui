@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=Gamma + Brightness
+Name=x11gammagui
 Comment=Adjust gamma and brightness
 Exec=sh -c '$HOME/bin/x11gammaguilaunch'
 Icon=display
