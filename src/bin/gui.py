@@ -94,7 +94,7 @@ def revert_and_exit():
 root = Tk()
 root.title("x11gammagui")
 
-Label(root, text=f"Display output: {OUTPUT}").pack(padx=10, pady=(8,0))
+Label(root, text=f"Display output: {output}").pack(padx=10, pady=(8,0))
 
 frame = Frame(root)
 frame.pack(padx=10, pady=8)
