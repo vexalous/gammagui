@@ -3,7 +3,17 @@
 import os
 import subprocess
 import sys
-from tkinter import Tk, Scale, HORIZONTAL, Button, Label, Frame, LEFT, RIGHT
+from tkinter import (
+    Tk,
+    Scale,
+    HORIZONTAL,
+    Button,
+    Label,
+    Frame,
+    LEFT,
+    RIGHT,
+    TclError,
+)
 
 os.environ.setdefault("DISPLAY", ":0")
 if "XAUTHORITY" not in os.environ:
@@ -60,13 +70,17 @@ def apply_brightness(b_val):
     subprocess.call(["xrandr", "--output", OUTPUT, "--brightness", str(v)])
 
 def revert(reset_sliders=True):
-    subprocess.call(["xrandr", "--output", OUTPUT, "--gamma", "1:1:1"])
-    subprocess.call(["xrandr", "--output", OUTPUT, "--brightness", "1"])
+    subprocess.call(
+        ["xrandr", "--output", OUTPUT, "--gamma", "1:1:1"],
+    )
+    subprocess.call(
+        ["xrandr", "--output", OUTPUT, "--brightness", "1"],
+    )
     if reset_sliders:
         try:
             g.set(100)
             b.set(100)
-        except Exception:
+        except (NameError, AttributeError, TclError):
             pass
 
 def revert_and_exit():
