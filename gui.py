@@ -31,12 +31,13 @@ if not lines:
     print("ERROR: no connected output found via xrandr", file=sys.stderr)
     sys.exit(1)
 
-primary = None
+PRIMARY = None
 for l in lines:
     if " primary " in l:
-        primary = l.split()[0]
+        PRIMARY = l.split()[0]
         break
-OUTPUT = primary or lines[0].split()[0]
+OUTPUT = PRIMARY or lines[0].split()[0]
+
 
 def clamp(v, lo, hi):
     try:
