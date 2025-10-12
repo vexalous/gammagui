@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""GUI for gamma and brightness controls."""
 import os
 import subprocess
 import sys
