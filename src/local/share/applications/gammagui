@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=gammagui
+Comment=Utility to adjust gamma and brightness
+Exec=sh -c '$HOME/bin/gammaguilaunch'
+Icon=display
+Terminal=false
+NoDisplay=false
+Categories=Utility;
