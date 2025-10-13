@@ -1,12 +1,12 @@
-# x11gammagui
+# gammagui
 
-A minimal GUI wrapper around `xrandr` to adjust gamma and brightness for a X11 output.
+A minimal GUI wrapper around `xrandr` to adjust gamma and brightness for a output.
 
 ---
-
+**CURRENTLY ONLY SUPPORTS x11, WAYLAND SUPPORT IS PLANNED**
 ## Features
 
-- Simple GUI sliders to adjust gamma and brightness for the selected X11 output.  
+- Simple GUI sliders to adjust gamma and brightness for the selected output.  
 - Installs user-local binaries to **~/bin** and data files to **~/.local/share**.  
 - Uses a manifest file for easy uninstall.  
 - No `sudo` permissions required for a install or uninstall.  
