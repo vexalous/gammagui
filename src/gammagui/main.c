@@ -22,9 +22,15 @@ void revert_values() {
 
 int main(int argc, char **argv) {
     const char *forced_output = NULL;
-    for (int i=1;i<argc;i++) {
-        if (strcmp(argv[i],"--help")==0) { printf("Usage: %s [--output NAME]\n", argv[0]); return 0; }
-        if (strcmp(argv[i],"--output")==0 && i+1<argc) { forced_output = argv[++i]; continue; }
+    for (int i=1; i<argc; i++) {
+        if (strcmp(argv[i],"--help")==0) { 
+            printf("Usage: %s [--output NAME]\n", argv[0]); 
+            return 0; 
+        }
+        if (strcmp(argv[i],"--output")==0 && i+1<argc) { 
+            forced_output = argv[++i]; 
+            continue; 
+        }
         fprintf(stderr, "Unknown arg: %s\n", argv[i]);
         return 1;
     }
@@ -33,8 +39,13 @@ int main(int argc, char **argv) {
         fprintf(stderr, "WARNING: xrandr not found. The UI will still run but changes won't apply.\n");
     }
 
-    if (forced_output) strncpy(display_output, forced_output, sizeof(display_output)-1);
-    else if (!detect_output(display_output, sizeof(display_output))) display_output[0] = '\0';
+    if (forced_output) {
+        strncpy(display_output, forced_output, sizeof(display_output)-1);
+        display_output[sizeof(display_output)-1] = '\0';
+    }
+    else if (!detect_output(display_output, sizeof(display_output))) {
+        display_output[0] = '\0';
+    }
 
     double gamma = 1.0, bright = 1.0;
     int selected = 0;
@@ -54,24 +65,53 @@ int main(int argc, char **argv) {
     draw_ui(win, gamma, bright, selected, rows - 2, cols - 2);
 
     int ch;
+    int needs_redraw = 0;
+
     while (1) {
         ch = getch();
+        
         if (ch == 'q' || ch == 'Q') break;
-        else if (ch == KEY_UP) selected = (selected == 0) ? 1 : 0;
-        else if (ch == KEY_DOWN) selected = (selected == 0) ? 1 : 0;
-        else if (ch == KEY_LEFT) {
+
+        if (ch == KEY_UP || ch == KEY_DOWN) {
+            selected = 1 - selected; 
+            needs_redraw = 1;
+        } else if (ch == KEY_LEFT) {
             if (selected == 0) gamma = clamp_double(gamma - 0.02, 0.5, 3.0);
             else bright = clamp_double(bright - 0.01, 0.1, 2.0);
-            if (debounce_allow()) apply_values(gamma, bright);
+            
+            if (debounce_allow()) {
+                apply_values(gamma, bright);
+                needs_redraw = 1;
+            }
         } else if (ch == KEY_RIGHT) {
             if (selected == 0) gamma = clamp_double(gamma + 0.02, 0.5, 3.0);
             else bright = clamp_double(bright + 0.01, 0.1, 2.0);
-            if (debounce_allow()) apply_values(gamma, bright);
-        } else if (ch == 'r' || ch == 'R') { revert_values(); gamma = 1.0; bright = 1.0; }
+            
+            if (debounce_allow()) {
+                apply_values(gamma, bright);
+                needs_redraw = 1;
+            }
+        } else if (ch == 'r' || ch == 'R') { 
+            revert_values(); 
+            gamma = 1.0; 
+            bright = 1.0; 
+            needs_redraw = 1; 
+        }
 
-        getmaxyx(stdscr, rows, cols);
-        wresize(win, rows - 2, cols - 2);
-        draw_ui(win, gamma, bright, selected, rows - 2, cols - 2);
+        int new_rows, new_cols;
+        getmaxyx(stdscr, new_rows, new_cols);
+        
+        if (new_rows != rows || new_cols != cols) {
+            rows = new_rows;
+            cols = new_cols;
+            wresize(win, rows - 2, cols - 2);
+            needs_redraw = 1;
+        }
+
+        if (needs_redraw) {
+            draw_ui(win, gamma, bright, selected, rows - 2, cols - 2);
+            needs_redraw = 0;
+        }
     }
 
     delwin(win);
