@@ -14,11 +14,11 @@ TARGET_MENU = $(MENU_DIR)/menu.elf
 TARGET_GAMMATUI = $(GAMMATUI_DIR)/gammatui.elf
 TARGET_SETTINGS = $(SETTINGS_DIR)/brightnesstui.elf
 
-GAMMATUI_SRCS = $(wildcard src/gammatui/*.c)
-MENU_SRCS = $(wildcard src/menu/*.c)
-SETTINGS_SRCS = $(wildcard src/settings/*.c)
+GAMMATUI_SRCS = src/gammagui/main.c src/gammagui/ui.c src/gammagui/xrandr.c
+MENU_SRCS = src/menu/menu.c src/menu/proc.c src/menu/ui.c src/menu/utils.c
+SETTINGS_SRCS = src/settings/brightnesstui.c src/settings/config.c
 
-GAMMATUI_OBJS = $(patsubst src/gammatui/%.c, $(GAMMATUI_DIR)/%.o, $(GAMMATUI_SRCS))
+GAMMATUI_OBJS = $(patsubst src/gammagui/%.c, $(GAMMATUI_DIR)/%.o, $(GAMMATUI_SRCS))
 MENU_OBJS = $(patsubst src/menu/%.c, $(MENU_DIR)/%.o, $(MENU_SRCS))
 SETTINGS_OBJS = $(patsubst src/settings/%.c, $(SETTINGS_DIR)/%.o, $(SETTINGS_SRCS))
 
@@ -39,7 +39,7 @@ $(TARGET_SETTINGS): $(SETTINGS_OBJS)
 	$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS_SETTINGS)
 	@echo "Linked ==> $@"
 
-$(GAMMATUI_DIR)/%.o: src/gammatui/%.c
+$(GAMMATUI_DIR)/%.o: src/gammagui/%.c
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $< -o $@
 	@echo "Compiled $<"
