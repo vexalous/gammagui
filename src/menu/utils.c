@@ -41,7 +41,7 @@ bool resolve_exe_dir(char *out, size_t outlen, const char *argv0){
 
 bool build_gammagui_path(char *out, size_t outlen, const char *argv0){
     char d[PATH_MAX];
-    return resolve_exe_dir(d,sizeof d,argv0) && snprintf(out,outlen,"%s/../gammagui/gammagui.elf",d) < (int)outlen;
+    return resolve_exe_dir(d,sizeof d,argv0) && snprintf(out,outlen,"%s/../gammatui/gammatui.elf",d) < (int)outlen;
 }
 bool build_settings_path(char *out, size_t outlen, const char *argv0){
     char d[PATH_MAX];
