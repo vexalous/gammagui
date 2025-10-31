@@ -67,7 +67,7 @@ void draw_ui(WINDOW *win, double gamma, double bright, int selected, int rows, i
     wattroff(win, COLOR_PAIR(COLOR_PAIR_TITLE) | A_BOLD);
 
     wattron(win, COLOR_PAIR(COLOR_PAIR_HEADER));
-    char output_buf[128];
+    char output_buf[256]; 
     snprintf(output_buf, sizeof(output_buf), "Display Output: %s", display_output[0] ? display_output : "(not detected)");
     mvwprintw(win, 2, (cols - strlen(output_buf)) / 2, "%s", output_buf);
     wattroff(win, COLOR_PAIR(COLOR_PAIR_HEADER));
