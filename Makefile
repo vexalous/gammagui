@@ -1,5 +1,6 @@
 CC = gcc
-CFLAGS = -D_POSIX_C_SOURCE=200809L -Wall -Wextra -std=c99 -Iinclude -g
+# Ugraded to the most pedantic settings
+CFLAGS = -std=c99 -pedantic-errors -Werror -Wall -Wextra -Wshadow -Wstrict-prototypes -Wmissing-prototypes -Wconversion -Wunreachable-code -Iinclude -g
 LDFLAGS = -pthread
 LDLIBS_GAMMATUI = -lncurses -lX11 -lXrandr -lm
 LDLIBS_MENU = -lncurses
