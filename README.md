@@ -1,6 +1,6 @@
-# gammagui
+# gammatui
 
-A minimal GUI wrapper to adjust gamma and brightness for a output.
+A minimal tui to adjust gamma and brightness for an output.
 
 **CURRENTLY ONLY SUPPORTS x11, WAYLAND SUPPORT IS PLANNED**
 
