@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 #include "proc.h"
 #include <errno.h>
+#include <ncurses.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <stdlib.h>
