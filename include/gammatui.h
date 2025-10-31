@@ -13,7 +13,7 @@ int debounce_allow(void);
 double clamp_double(double v, double lo, double hi);
 
 void init_colors_safe(void);
-void draw_bar(WINDOW *w, int y, int x, int width, double value, double lo, double hi, int color_fill, int color_bg);
+void draw_bar(WINDOW *w, int y, int x, int width, double value, double lo, double hi);
 void draw_rounded_border(WINDOW *w);
 void draw_ui(WINDOW *win, double gamma, double bright, int selected, int rows, int cols);
 
