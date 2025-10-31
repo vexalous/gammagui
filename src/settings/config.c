@@ -3,38 +3,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <libgen.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <limits.h>
+#include <stdbool.h>
+#include <ctype.h>
 
 static bool exe_dir(char *out, size_t outlen, const char *argv0) {
 #if defined(__linux__)
     char buf[PATH_MAX];
-    ssize_t n = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
+    ssize_t n = readlink("/proc/self/exe", buf, sizeof(buf));
     if (n > 0) {
         buf[n] = '\0';
-        char *d = dirname(buf);
-        if (!d) return false;
-        strncpy(out, d, outlen - 1);
-        out[outlen - 1] = '\0';
-        return true;
+        char *last_slash = strrchr(buf, '/');
+        if (last_slash) {
+            *last_slash = '\0';
+            strncpy(out, buf, outlen - 1);
+            out[outlen - 1] = '\0';
+            return true;
+        }
     }
 #endif
-    if (!argv0 || argv0[0] == '\0') return false;
-    if (strchr(argv0, '/')) {
-        char tmp[PATH_MAX];
-        if (argv0[0] == '/') {
-            strncpy(tmp, argv0, sizeof(tmp)-1);
-            tmp[sizeof(tmp)-1] = '\0';
-        } else {
-            char cwd[PATH_MAX];
-            if (!getcwd(cwd, sizeof(cwd))) return false;
-            if (snprintf(tmp, sizeof(tmp), "%s/%s", cwd, argv0) >= (int)sizeof(tmp)) return false;
-        }
-        char *d = dirname(tmp);
-        if (!d) return false;
-        strncpy(out, d, outlen - 1);
+    if (!argv0 || !strchr(argv0, '/')) {
+        return false;
+    }
+    char tmp[PATH_MAX];
+    strncpy(tmp, argv0, sizeof(tmp) - 1);
+    tmp[sizeof(tmp) - 1] = '\0';
+
+    char *last_slash = strrchr(tmp, '/');
+    if (last_slash) {
+        *last_slash = '\0';
+        strncpy(out, tmp, outlen - 1);
         out[outlen - 1] = '\0';
         return true;
     }
@@ -49,7 +49,7 @@ bool config_path_for_exe(char *out, size_t outlen, const char *argv0) {
 }
 
 bool load_config(struct cfg *c, const char *path) {
-    if (!c) return false;
+    if (!c || !path) return false;
 
     c->output[0] = '\0';
     c->gamma_max = 3.0;
@@ -58,51 +58,42 @@ bool load_config(struct cfg *c, const char *path) {
     FILE *f = fopen(path, "r");
     if (!f) return false;
 
-    if (fseek(f, 0, SEEK_END) != 0) { fclose(f); return false; }
-    long sz = ftell(f);
-    if (sz <= 0 || sz > 200000) { fclose(f); return false; }
-    rewind(f);
+    char line[256];
+    while (fgets(line, sizeof(line), f)) {
+        char *key = line;
+        while (isspace((unsigned char)*key)) key++;
 
-    char *buf = malloc((size_t)sz + 1);
-    if (!buf) { fclose(f); return false; }
-    size_t got = fread(buf, 1, (size_t)sz, f);
-    buf[got] = '\0';
-    fclose(f);
-
-    char *p;
-    p = strstr(buf, "\"output\"");
-    if (p) {
-        p = strchr(p, ':');
-        if (p) {
+        if (strncmp(key, "\"output\"", 8) == 0) {
+            char *p = strchr(key, ':');
+            if (!p) continue;
             p++;
-            while (*p && (*p == ' ' || *p == '\t')) p++;
+            while (isspace((unsigned char)*p)) p++;
             if (*p == '\"') {
                 p++;
-                char *q = strchr(p, '\"');
-                if (q) {
-                    size_t n = (size_t)(q - p);
-                    if (n >= OUTPUT_LEN) n = OUTPUT_LEN - 1;
-                    memcpy(c->output, p, n);
-                    c->output[n] = '\0';
+                char *end = strchr(p, '\"');
+                if (end) {
+                    size_t len = (size_t)(end - p);
+                    if (len >= OUTPUT_LEN) len = OUTPUT_LEN - 1;
+                    memcpy(c->output, p, len);
+                    c->output[len] = '\0';
                 }
+            }
+        } else if (strncmp(key, "\"gamma_max\"", 11) == 0) {
+            char *p = strchr(key, ':');
+            if (p) {
+                p++;
+                c->gamma_max = strtod(p, NULL);
+            }
+        } else if (strncmp(key, "\"brightness_max\"", 16) == 0 || strncmp(key, "\"bright_max\"", 12) == 0) {
+            char *p = strchr(key, ':');
+            if (p) {
+                p++;
+                c->bright_max = strtod(p, NULL);
             }
         }
     }
 
-    p = strstr(buf, "\"gamma_max\"");
-    if (p) {
-        double v = 0;
-        if (sscanf(p, "\"gamma_max\"%*[^0-9.-]%lf", &v) == 1) c->gamma_max = v;
-    }
-
-    p = strstr(buf, "\"brightness_max\"");
-    if (!p) p = strstr(buf, "\"bright_max\"");
-    if (p) {
-        double v = 0;
-        if (sscanf(p, "%*[^0-9.-]%lf", &v) == 1) c->bright_max = v;
-    }
-
-    free(buf);
+    fclose(f);
     return true;
 }
 
@@ -110,16 +101,27 @@ bool save_config(const struct cfg *c, const char *path) {
     if (!c || !path) return false;
     char tmp[PATH_MAX];
     if (snprintf(tmp, sizeof(tmp), "%s.tmp", path) >= (int)sizeof(tmp)) return false;
+
     FILE *f = fopen(tmp, "w");
     if (!f) return false;
+
     fprintf(f, "{\n");
     fprintf(f, "  \"output\": \"%s\",\n", c->output[0] ? c->output : "");
     fprintf(f, "  \"gamma_max\": %.3f,\n", c->gamma_max);
     fprintf(f, "  \"brightness_max\": %.3f\n", c->bright_max);
     fprintf(f, "}\n");
-    fflush(f);
+
+    if (fflush(f) != 0) {
+        fclose(f);
+        remove(tmp);
+        return false;
+    }
     fsync(fileno(f));
     fclose(f);
-    if (rename(tmp, path) != 0) return false;
+
+    if (rename(tmp, path) != 0) {
+        remove(tmp);
+        return false;
+    }
     return true;
 }
