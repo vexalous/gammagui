@@ -1,5 +1,4 @@
 CC = gcc
-# Ugraded to the most pedantic settings
 CFLAGS = -std=c99 -pedantic-errors -Werror -Wall -Wextra -Wshadow -Wstrict-prototypes -Wmissing-prototypes -Wconversion -Wunreachable-code -Iinclude -g
 LDFLAGS = -pthread
 LDLIBS_GAMMATUI = -lncurses -lX11 -lXrandr -lm
