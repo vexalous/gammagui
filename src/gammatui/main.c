@@ -1,24 +1,10 @@
 #define _POSIX_C_SOURCE 200809L
 #include "gammatui.h"
+#include "gamma_control.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ncurses.h>
-
-void apply_values(double gamma, double bright) {
-    if (!display_output[0]) return;
-    char val[128];
-    snprintf(val, sizeof(val), "%.3f:%.3f:%.3f", gamma, gamma, gamma);
-    xr_call_async(display_output, "--gamma", val);
-    snprintf(val, sizeof(val), "%.3f", bright);
-    xr_call_async(display_output, "--brightness", val);
-}
-
-void revert_values() {
-    if (!display_output[0]) return;
-    xr_call_async(display_output, "--gamma", "1:1:1");
-    xr_call_async(display_output, "--brightness", "1");
-}
 
 int main(int argc, char **argv) {
     const char *forced_output = NULL;
