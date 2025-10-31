@@ -97,19 +97,19 @@ static void *xr_worker(void *arg) {
             float r, g, b;
             sscanf(a->val, "%f:%f:%f", &r, &g, &b);
             for (int i = 0; i < size; i++) {
-                double ramp = (double)i / (size - 1);
+                double ramp = (double)i / (double)(size - 1);
                 gamma->red[i]   = (unsigned short)(pow(ramp, 1.0/r) * 65535.0 + 0.5);
                 gamma->green[i] = (unsigned short)(pow(ramp, 1.0/g) * 65535.0 + 0.5);
                 gamma->blue[i]  = (unsigned short)(pow(ramp, 1.0/b) * 65535.0 + 0.5);
             }
         } else if (strcmp(a->opt, "--brightness") == 0) {
-            float brightness = atof(a->val);
+            float brightness = strtof(a->val, NULL);
             XRRCrtcGamma *current_gamma = XRRGetCrtcGamma(dpy, crtc_id);
             if (current_gamma) {
                  for (int i = 0; i < size; i++) {
-                    gamma->red[i]   = (unsigned short)(current_gamma->red[i] * brightness);
-                    gamma->green[i] = (unsigned short)(current_gamma->green[i] * brightness);
-                    gamma->blue[i]  = (unsigned short)(current_gamma->blue[i] * brightness);
+                    gamma->red[i]   = (unsigned short)((double)current_gamma->red[i] * brightness);
+                    gamma->green[i] = (unsigned short)((double)current_gamma->green[i] * brightness);
+                    gamma->blue[i]  = (unsigned short)((double)current_gamma->blue[i] * brightness);
                 }
                 XRRFreeGamma(current_gamma);
             }
@@ -142,7 +142,7 @@ void xr_call_async(const char *output, const char *opt, const char *val) {
     }
 }
 
-int debounce_allow() {
+int debounce_allow(void) {
     struct timespec now;
     clock_gettime(CLOCK_MONOTONIC, &now);
     pthread_mutex_lock(&debounce_mutex);
