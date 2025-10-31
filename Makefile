@@ -14,7 +14,7 @@ TARGET_MENU = $(MENU_DIR)/menu.elf
 TARGET_GAMMATUI = $(GAMMATUI_DIR)/gammatui.elf
 TARGET_SETTINGS = $(SETTINGS_DIR)/brightnesstui.elf
 
-GAMMATUI_SRCS = src/gammatui/main.c src/gammatui/ui.c src/gammatui/xrandr.c
+GAMMATUI_SRCS = src/gammatui/main.c src/gammatui/ui.c src/gammatui/xrandr.c src/gammatui/gamma_control.c
 MENU_SRCS = src/menu/menu.c src/menu/proc.c src/menu/ui.c src/menu/utils.c
 SETTINGS_SRCS = src/settings/brightnesstui.c src/settings/config.c
 
