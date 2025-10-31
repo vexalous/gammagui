@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -D_POSIX_C_SOURCE=200809L -Wall -Wextra -std=c99 -Iinclude -g
 LDFLAGS = -pthread
-LDLIBS_GAMMATUI = -lncurses
+LDLIBS_GAMMATUI = -lncurses -lX11 -lXrandr -lm
 LDLIBS_MENU = -lncurses
 LDLIBS_SETTINGS = -lncurses
 
