@@ -3,7 +3,7 @@
 #include <ncurses.h>
 #include <string.h>
 
-const char *MENU_TITLE = "x11gamma - Main Menu";
+const char *MENU_TITLE = "gammatui - Main Menu";
 const char *menu_items[] = { "Adjustment", "Settings", "Quit" };
 
 void draw_menu(WINDOW *w,int hl){

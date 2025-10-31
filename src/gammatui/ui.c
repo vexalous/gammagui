@@ -1,5 +1,5 @@
 #define _POSIX_C_SOURCE 200809L
-#include "gammagui.h"
+#include "gammatui.h"
 #include <string.h>
 
 void init_colors_safe() {
@@ -55,10 +55,10 @@ void draw_ui(WINDOW *win, double gamma, double bright, int selected, int rows, i
 
     int left = 3, top = 1;
     wattron(win, COLOR_PAIR(1) | A_BOLD);
-    mvwprintw(win, top, left, "x11gammacurses");
+    mvwprintw(win, top, left, "gammatui");
     wattroff(win, COLOR_PAIR(1) | A_BOLD);
     wattron(win, COLOR_PAIR(3));
-    mvwprintw(win, top, left+16, "- output: %s", display_output[0]?display_output:"(not detected)");
+    mvwprintw(win, top, left+10, "- output: %s", display_output[0]?display_output:"(not detected)");
     wattroff(win, COLOR_PAIR(3));
 
     wattron(win, COLOR_PAIR(2));

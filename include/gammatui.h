@@ -1,5 +1,5 @@
-#ifndef GAMMAGUI_H
-#define GAMMAGUI_H
+#ifndef GAMMATUI_H
+#define GAMMATUI_H
 #define _POSIX_C_SOURCE 200809L
 
 #include <stdbool.h>

@@ -30,9 +30,9 @@ int main(int argc, char **argv){
 
     int highlight = 0;
 
-    char gammagui_path[PATH_MAX] = {0};
-    bool gammagui_built = build_gammagui_path(gammagui_path, sizeof gammagui_path, (argc>0)?argv[0]:NULL);
-    bool gammagui_ok = gammagui_built && is_executable_file(gammagui_path);
+    char gammatui_path[PATH_MAX] = {0};
+    bool gammatui_built = build_gammatui_path(gammatui_path, sizeof gammatui_path, (argc>0)?argv[0]:NULL);
+    bool gammatui_ok = gammatui_built && is_executable_file(gammatui_path);
 
     char settings_path[PATH_MAX] = {0};
     bool settings_built = build_settings_path(settings_path, sizeof settings_path, (argc>0)?argv[0]:NULL);
@@ -51,15 +51,15 @@ int main(int argc, char **argv){
         else if (ch == KEY_DOWN) highlight = (highlight + 1) % 3;
         else if (ch == '\n' || ch == KEY_ENTER){
             if (highlight == MI_Adjustment){
-                if (!gammagui_ok){
+                if (!gammatui_ok){
                     show_message(win, "Not found",
-                                 "Expected ../gammagui/gammagui.elf relative to menu.elf\nPlace gammagui.elf at ../gammagui/gammagui.elf and make it executable.");
+                                 "Expected ../gammatui/gammatui.elf relative to menu.elf\nPlace gammatui.elf at ../gammatui/gammatui.elf and make it executable.");
                 } else {
                     flushinp(); endwin();
-                    int rc = spawn_and_wait(gammagui_path);
+                    int rc = spawn_and_wait(gammatui_path);
                     struct timespec ts = {0, 100000000L}; nanosleep(&ts,NULL);
                     if (win){ delwin(win); win = NULL; } win = recreate_window(&rows,&cols);
-                    if (rc == 0) gammagui_ok = is_executable_file(gammagui_path);
+                    if (rc == 0) gammatui_ok = is_executable_file(gammatui_path);
                     else if (rc == -1) show_message(win, "Error", "Failed to run adjustment (fork/exec error).");
                     else if (rc == 127) show_message(win, "Error", "Adjustment failed to exec (exit 127).");
                     else if (rc >= 128){ char buf[128]; snprintf(buf,sizeof buf,"Adjustment terminated by signal %d", rc-128); show_message(win,"Crashed",buf); }

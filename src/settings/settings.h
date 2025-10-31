@@ -1,5 +1,5 @@
-#ifndef X11GAMMA_SETTINGS_H
-#define X11GAMMA_SETTINGS_H
+#ifndef GAMMATUI_SETTINGS_H
+#define GAMMATUI_SETTINGS_H
 #define _POSIX_C_SOURCE 200809L
 
 #include <stddef.h>
