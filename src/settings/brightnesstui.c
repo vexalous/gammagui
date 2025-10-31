@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include <ctype.h>
 
-static const char *TITLE = "x11gamma - Brightness Settings";
+static const char *TITLE = "Gammatui - Brightness Settings";
 static const char *UI_FIELDS[] = { "Output", "Gamma max", "Brightness max" };
 enum { FI_OUTPUT = 0, FI_GAMMA_MAX = 1, FI_BRIGHT_MAX = 2, FI_COUNT = 3 };
 
