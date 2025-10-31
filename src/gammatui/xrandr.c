@@ -6,60 +6,140 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <X11/Xlib.h>
+#include <X11/extensions/Xrandr.h>
+#include <math.h>
 
 char display_output[128] = {0};
+static RRCrtc crtc_id = 0;
 
 static pthread_mutex_t debounce_mutex = PTHREAD_MUTEX_INITIALIZER;
 static struct timespec last_apply = {0,0};
 static const long DEBOUNCE_MS = 80;
 
 int detect_output(char *outbuf, size_t outlen) {
-    FILE *fp = popen("xrandr --query 2>/dev/null", "r");
-    if (!fp) return 0;
-    char line[512];
+    Display *dpy = XOpenDisplay(NULL);
+    if (!dpy) return 0;
+
+    Window root = DefaultRootWindow(dpy);
+    XRRScreenResources *res = XRRGetScreenResources(dpy, root);
+    if (!res) {
+        XCloseDisplay(dpy);
+        return 0;
+    }
+
+    int found_primary = 0;
     char candidate[128] = {0};
-    while (fgets(line, sizeof(line), fp)) {
-        if (strstr(line, " connected")) {
-            if (strstr(line, " primary ")) {
-                sscanf(line, "%127s", outbuf);
-                pclose(fp);
-                return 1;
-            }
-            if (candidate[0] == '\0') sscanf(line, "%127s", candidate);
+    RRCrtc candidate_crtc = 0;
+
+    for (int i = 0; i < res->noutput; i++) {
+        XRROutputInfo *output_info = XRRGetOutputInfo(dpy, res, res->outputs[i]);
+        if (!output_info || output_info->connection != RR_Connected) {
+            if (output_info) XRRFreeOutputInfo(output_info);
+            continue;
         }
+
+        if (XRRGetOutputPrimary(dpy, root) == res->outputs[i]) {
+            strncpy(outbuf, output_info->name, outlen - 1);
+            outbuf[outlen - 1] = '\0';
+            crtc_id = output_info->crtc;
+            found_primary = 1;
+            XRRFreeOutputInfo(output_info);
+            break;
+        }
+
+        if (candidate[0] == '\0') {
+            strncpy(candidate, output_info->name, sizeof(candidate) - 1);
+            candidate[sizeof(candidate) - 1] = '\0';
+            candidate_crtc = output_info->crtc;
+        }
+        XRRFreeOutputInfo(output_info);
     }
-    if (candidate[0]) {
-        strncpy(outbuf, candidate, outlen-1);
+
+    if (!found_primary && candidate[0]) {
+        strncpy(outbuf, candidate, outlen - 1);
         outbuf[outlen-1] = '\0';
-        pclose(fp);
-        return 1;
+        crtc_id = candidate_crtc;
     }
-    pclose(fp);
-    return 0;
+
+    XRRFreeScreenResources(res);
+    XCloseDisplay(dpy);
+    return found_primary || (candidate[0] != '\0');
 }
 
-struct xr_args { char output[128]; char opt[64]; char val[64]; };
+struct xr_args {
+    char opt[64];
+    char val[64];
+};
 
 static void *xr_worker(void *arg) {
     struct xr_args *a = arg;
-    char cmd[512];
-    snprintf(cmd, sizeof(cmd), "xrandr --output %s %s %s 2>/dev/null", a->output, a->opt, a->val);
-    system(cmd);
+    Display *dpy = XOpenDisplay(NULL);
+    if (!dpy) {
+        free(a);
+        return NULL;
+    }
+
+    if (crtc_id == 0) {
+        detect_output(display_output, sizeof(display_output));
+    }
+    
+    if (crtc_id != 0) {
+        int size = XRRGetCrtcGammaSize(dpy, crtc_id);
+        if (size == 0) {
+             XCloseDisplay(dpy);
+             free(a);
+             return NULL;
+        }
+        XRRCrtcGamma *gamma = XRRAllocGamma(size);
+
+        if (strcmp(a->opt, "--gamma") == 0) {
+            float r, g, b;
+            sscanf(a->val, "%f:%f:%f", &r, &g, &b);
+            for (int i = 0; i < size; i++) {
+                double ramp = (double)i / (size - 1);
+                gamma->red[i]   = (unsigned short)(pow(ramp, 1.0/r) * 65535.0 + 0.5);
+                gamma->green[i] = (unsigned short)(pow(ramp, 1.0/g) * 65535.0 + 0.5);
+                gamma->blue[i]  = (unsigned short)(pow(ramp, 1.0/b) * 65535.0 + 0.5);
+            }
+        } else if (strcmp(a->opt, "--brightness") == 0) {
+            float brightness = atof(a->val);
+            XRRCrtcGamma *current_gamma = XRRGetCrtcGamma(dpy, crtc_id);
+            if (current_gamma) {
+                 for (int i = 0; i < size; i++) {
+                    gamma->red[i]   = (unsigned short)(current_gamma->red[i] * brightness);
+                    gamma->green[i] = (unsigned short)(current_gamma->green[i] * brightness);
+                    gamma->blue[i]  = (unsigned short)(current_gamma->blue[i] * brightness);
+                }
+                XRRFreeGamma(current_gamma);
+            }
+        }
+
+        XRRSetCrtcGamma(dpy, crtc_id, gamma);
+        XRRFreeGamma(gamma);
+    }
+
+
+    XCloseDisplay(dpy);
     free(a);
     return NULL;
 }
 
 void xr_call_async(const char *output, const char *opt, const char *val) {
+    (void)output;
     struct xr_args *a = malloc(sizeof(*a));
     if (!a) return;
-    strncpy(a->output, output, sizeof(a->output)-1);
-    a->output[sizeof(a->output)-1] = '\0';
-    strncpy(a->opt, opt, sizeof(a->opt)-1);
-    a->opt[sizeof(a->opt)-1] = '\0';
-    strncpy(a->val, val, sizeof(a->val)-1);
-    a->val[sizeof(a->val)-1] = '\0';
+    strncpy(a->opt, opt, sizeof(a->opt) - 1);
+    a->opt[sizeof(a->opt) - 1] = '\0';
+    strncpy(a->val, val, sizeof(a->val) - 1);
+    a->val[sizeof(a->val) - 1] = '\0';
+
     pthread_t t;
-    if (pthread_create(&t, NULL, xr_worker, a) == 0) pthread_detach(t);
+    if (pthread_create(&t, NULL, xr_worker, a) == 0) {
+        pthread_detach(t);
+    } else {
+        free(a);
+    }
 }
 
 int debounce_allow() {
@@ -77,7 +157,5 @@ int debounce_allow() {
 }
 
 double clamp_double(double v, double lo, double hi) {
-    if (v < lo) return lo;
-    if (v > hi) return hi;
-    return v;
+    return v < lo ? lo : (v > hi ? hi : v);
 }
